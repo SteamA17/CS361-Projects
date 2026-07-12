@@ -1,0 +1,194 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#ffffff;
+}
+
+/* Header */
+
+header{
+    height:70px;
+    border-bottom:3px solid #24bfff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 25px;
+}
+
+.logo{
+    color:#24bfff;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.profile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.profile i{
+    font-size:28px;
+}
+
+/* Layout */
+
+.container{
+    display:flex;
+    min-height:calc(100vh - 130px);
+}
+
+/* Sidebar */
+
+aside{
+    width:220px;
+    border-right:1px solid #ccc;
+    padding-top:25px;
+}
+
+aside a{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#000;
+    text-decoration:none;
+    padding:15px 18px;
+    font-size:15px;
+}
+
+aside a:hover{
+    background:#f3f3f3;
+}
+
+/* Main */
+
+main{
+    flex:1;
+    padding:25px;
+}
+
+/* Tabs */
+
+.tabs{
+    width:380px;
+    background:#ddd;
+    border-radius:30px;
+    display:flex;
+    justify-content:space-around;
+    padding:6px;
+    margin-bottom:40px;
+    text-decoration: none;
+}
+
+.tabs a{
+    border:none;
+    text-decoration: none;
+    background:none;
+    padding:8px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+.tabs .active{
+    background:#27c5ff;
+    color:white;
+}
+
+/* Cards */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:30px;
+    margin-bottom:35px;
+}
+
+.card{
+    border-radius:8px;
+    overflow:hidden;
+    background:#ece7e7;
+}
+
+.image{
+    height:150px;
+    background:#aaa;
+}
+
+.text{
+    padding:18px;
+    font-size:15px;
+}
+
+hr{
+    margin:20px 0;
+}
+
+h3{
+    margin-bottom:25px;
+    font-weight:normal;
+}
+
+/* Footer */
+
+footer{
+    height:60px;
+    border-top:2px solid #00d5c7;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 30px;
+}
+
+footer .footer-links{
+    display:flex;
+    gap:40px;
+}
+
+footer a{
+    color:#444;
+    text-decoration:none;
+}
+
+footer a:hover{
+    color:#24bfff;
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+    .container{
+        flex-direction:column;
+    }
+
+    aside{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid #ddd;
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .cards{
+        grid-template-columns:1fr;
+    }
+
+    .tabs{
+        width:100%;
+    }
+
+    footer{
+        flex-direction:column;
+        height:auto;
+        padding:15px;
+        gap:10px;
+    }
+
+}

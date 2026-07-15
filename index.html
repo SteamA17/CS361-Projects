@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESCHOOL</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">ESCHOOL</div>
+
+        <div class="profile">
+            <span>SteamA17</span>
+            <i class="fa-solid fa-circle-user"></i>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- Sidebar -->
+        <aside>
+            <a href="/dashboard"><i class="fa-solid fa-video"></i> Lecture Videos</a>
+            <a href="/dashboard"><i class="fa-solid fa-download"></i> Downloads</a>
+            <a href="/dashboard"><i class="fa-solid fa-comments"></i> Group Chat</a>
+            <a href="/dashboard"><i class="fa-solid fa-bookmark"></i> Bookmark</a>
+            <a href="/dashboard"><i class="fa-solid fa-star"></i> Favourites</a>
+            <a href="/dashboard"><i class="fa-solid fa-circle-info"></i> Info</a>
+        </aside>
+
+        <!-- Main -->
+        <main>
+
+            <!-- Navigation Tabs -->
+            <div class="tabs" id="tabs">
+                <a href="/dashboard" data-page="dashboard">Dashboard</a>
+                <a href="/notes" data-page="notes">Notes</a>
+                <a href="/tests" data-page="tests">Tests</a>
+                <a href="/sessional" data-page="sessional">Sessional</a>
+            </div>
+
+            <!-- Dynamic content mount point -->
+            <div id="page-content"></div>
+
+        </main>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div>ESCHOOL</div>
+        <div class="footer-links">
+            <a href="#">Terms &amp; Conditions</a>
+            <a href="#">Customer Support</a>
+        </div>
+    </footer>
+
+    <script src="content.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

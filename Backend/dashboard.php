@@ -1,10 +1,19 @@
+<?php
+    session_start();
+
+    if(!isset($_SESSION['email'])){
+        header("Location: index.php");
+        exit();
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESCHOOL Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../Fronted/style.css">
 
     <!-- Font Awesome -->
     <link rel="stylesheet"
@@ -17,7 +26,7 @@
         <div class="logo">ESCHOOL</div>
 
         <div class="profile">
-            <span>SteamA17</span>
+            <h4 style="color: rgb(56, 146, 206); font-size: 15px;"><?php echo $_SESSION['email']; ?></h4>
             <i class="fa-solid fa-circle-user"></i>
         </div>
     </header>

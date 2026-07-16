@@ -2,11 +2,123 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+    font-family:"poppins", sans-serif;
 }
 
 body{
-    background:#ffffff;
+    background-color: #c9d6ff;
+    background:#fff;
+}
+
+/*Signin and Signup Section*/
+.log-container{
+    background: #fff;
+    width: 450px;
+    padding: 1.5rem;
+    margin: 50px auto;
+    border-radius: 10px;
+    box-shadow: 0 20px 35px rgba(0,0,1,0.9);
+}
+
+form{
+    margin: 0 2rem;
+}
+.form-title{
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 1.3rem;
+    margin-bottom: 0.4rem;
+}
+input{
+    color: inherit;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #757575;
+    font-size: 15px;
+    padding: 1.5rem;
+}
+.input-group{
+    padding: 1%;
+    position: relative;
+}
+.input:focus{
+    background-color: transparent;
+    outline: transparent;
+    border-bottom: 2px solid hsl(327,90%, 80%);
+}
+.input-placeholder{
+    color: transparent;
+}
+label{
+    color: #757575;
+    position: relative;
+    top: 1.2em;
+    left: -1.3em;
+    cursor: auto;
+    transition: 0.3s ease all;
+}
+input:focus~label,input:not(:placeholder-shown)~label{
+    font-size: 15px;
+    color: hsl(327,90%, 80%);
+    top: -3em;
+}
+.btn{
+    font-size: 1.1rem;
+    padding: 8px 0;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    color: white;
+    background: rgb(56, 146, 206);
+    transition: 0.9s;
+}
+.btn:hover{
+    background: #07001f;
+}
+.or{
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+.icons{
+    text-align: center;
+}
+.icons i{
+    font-size: 1.5rem;
+    color: rgb(56, 146, 206);
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid #dfe9f5;
+    margin: 0 15px;
+    transition: 1s;
+}
+.icons i:hover{
+    background: #07001f;
+    font-size: 1.6rem;
+    border: 2px solid rgb(56, 146, 206);
+}
+.links{
+    display: flex;
+    justify-content: space-around;
+    padding: 0 1.5rem;
+    margin-top: 0.9rem;
+    font-weight: bold;
+}
+button{
+    color: rgb(56, 146, 206);
+    border: none;
+    background-color: transparent;
+    font-size: 1rem;
+    font-weight: bold;
+}
+button:hover{
+    text-decoration: underline;
+    color: blue;
 }
 
 /* Header */

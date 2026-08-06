@@ -19,7 +19,7 @@
     <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
-<body>
+<body data-page="dashboard">
 
     <!-- Header -->
     <header>
@@ -77,7 +77,7 @@
             <h3>My Business</h3>
 
             <!-- Bottom Cards -->
-            <div class="cards">
+            <div class="cards" id="businessCards">
 
                 <div class="card">
                     <div class="image"></div>
@@ -93,6 +93,35 @@
                     </div>
                 </div>
 
+                <div class="card" id="addCategoryCard">
+                    <div class="image"></div>
+                    <div class="text">
+                        Add New Category
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Add Category Modal -->
+            <div class="modal-overlay" id="categoryModalOverlay">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h3>Add New Category</h3>
+                        <button type="button" class="modal-close" id="categoryModalClose" aria-label="Close">&times;</button>
+                    </div>
+                    <form id="categoryForm">
+                        <div class="input-group">
+                            <input type="text" id="categoryCode" placeholder="Course Code (e.g. CS210)" required maxlength="10">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="categoryName" placeholder="Course Name (optional)" maxlength="40">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" id="categoryCancelBtn">Cancel</button>
+                            <button type="submit" class="btn">Add Category</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
         </main>
@@ -112,6 +141,8 @@
             <a href="#">Customer Support</a>
         </div>
     </footer>
+
+    <script src="../Frontend/script.js"></script>
 
 </body>
 </html>

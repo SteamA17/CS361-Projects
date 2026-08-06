@@ -304,3 +304,152 @@ footer a:hover{
     }
 
 }
+
+/* ========================================================
+   My Business — Add Category functionality
+   Companion file to style.css — reuses the same color
+   palette (rgb(56,146,206) / #24bfff), radius, and shadow
+   language already used by .log-container, .card and .btn
+   so the modal blends into the existing design.
+   ======================================== */
+
+/* Modal Overlay */
+.modal-overlay{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.55);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-overlay.active{
+    display:flex;
+}
+
+/* Modal box mirrors .log-container's card look */
+.modal-box{
+    background:#fff;
+    width:90%;
+    max-width:400px;
+    padding:1.5rem;
+    border-radius:10px;
+    box-shadow:0 20px 35px rgba(0,0,1,0.9);
+    animation:modalPop 0.2s ease-out;
+}
+
+@keyframes modalPop{
+    from{ transform:scale(0.95); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+.modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 2rem;
+    margin-bottom:0.5rem;
+}
+
+.modal-header h3{
+    font-size:1.4rem;
+    margin-bottom:0;
+    font-weight:bold;
+}
+
+.modal-close{
+    background:none;
+    border:none;
+    font-size:1.6rem;
+    line-height:1;
+    cursor:pointer;
+    color:#757575;
+}
+
+.modal-close:hover{
+    color:#24bfff;
+}
+
+#categoryForm{
+    margin:0 2rem;
+}
+
+.modal-actions{
+    display:flex;
+    gap:12px;
+    margin-top:0.5rem;
+}
+
+.modal-actions .btn{
+    margin:0;
+}
+
+.btn-secondary{
+    font-size:1.1rem;
+    padding:8px 0;
+    border-radius:5px;
+    outline:none;
+    border:1px solid #ccc;
+    width:100%;
+    cursor:pointer;
+    color:#444;
+    background:#ece7e7;
+    transition:0.4s;
+}
+
+.btn-secondary:hover{
+    background:#dcdcdc;
+}
+
+/* Card that opens the modal (dashboard "Add New Category" card) */
+#addCategoryCard{
+    cursor:pointer;
+    transition:transform 0.2s ease, background 0.2s ease;
+}
+
+#addCategoryCard:hover{
+    background:#dfe9f5;
+}
+
+/* Button that opens the modal (notes/tests/sessional "Add" button) */
+#addBusinessBtn{
+    cursor:pointer;
+}
+
+/* Newly added category cards under My Business */
+.business-card{
+    position:relative;
+}
+
+.business-card .remove-card{
+    position:absolute;
+    top:6px;
+    right:6px;
+    width:22px;
+    height:22px;
+    border:none;
+    border-radius:50%;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+}
+
+.business-card:hover .remove-card{
+    display:flex;
+}
+
+.business-card .text small{
+    display:block;
+    font-weight:normal;
+    color:#757575;
+    margin-top:2px;
+}

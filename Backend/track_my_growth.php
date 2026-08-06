@@ -146,8 +146,8 @@
 
     <div class="container">
         <!-- Sidebar -->
-        <aside>
-            <a href="#"><i class="fa-solid fa-video"></i> Lecture Videos</a>
+         <aside>
+            <a href="lecture_videos.php"><i class="fa-solid fa-video"></i> Lecture Videos</a>
             <a href="download_history.php"><i class="fa-solid fa-download"></i> Downloads</a>
             <a href="#"><i class="fa-solid fa-comments"></i> Group Chat</a>
             <a href="materials.php"><i class="fa-solid fa-book"></i>Materials</a>

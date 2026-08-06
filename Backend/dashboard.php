@@ -12,8 +12,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESCHOOL Dashboard</title>
-    <link rel="stylesheet" href="../Fronted/style.css">
+    <title>ESCHOOL: Dashboard</title>
+    <link rel="stylesheet" href="../Frontend/style.css">
 
     <!-- Font Awesome -->
     <link rel="stylesheet"
@@ -35,19 +35,11 @@
 
         <!-- Sidebar -->
         <aside>
-
             <a href="#"><i class="fa-solid fa-video"></i> Lecture Videos</a>
-
-            <a href="#"><i class="fa-solid fa-download"></i> Downloads</a>
-
+            <a href="download_history.php"><i class="fa-solid fa-download"></i> Downloads</a>
             <a href="#"><i class="fa-solid fa-comments"></i> Group Chat</a>
-
-            <a href="#"><i class="fa-solid fa-bookmark"></i> Bookmark</a>
-
-            <a href="#"><i class="fa-solid fa-star"></i> Favourites</a>
-
-            <a href="#"><i class="fa-solid fa-circle-info"></i> Info</a>
-
+            <a href="materials.php"><i class="fa-solid fa-book"></i>Materials</a>
+            <a href="profile.php"><i class="fa-solid fa-circle-info"></i> Info</a>
         </aside>
 
         <!-- Main -->
@@ -90,14 +82,14 @@
                 <div class="card">
                     <div class="image"></div>
                     <div class="text">
-                        Make a new category
+                        <a href="uploads.php" style="text-decoration: none; color: inherit;">Upload New Material</a>
                     </div>
                 </div>
 
                 <div class="card">
                     <div class="image"></div>
                     <div class="text">
-                        Track my growth
+                        <a href="track_my_growth.php" style="text-decoration: none; color: inherit;">Track My Growth</a>
                     </div>
                 </div>
 
@@ -109,14 +101,16 @@
 
     <!-- Footer -->
     <footer>
-
-        <div>ESCHOOL</div>
+        <div class="logo">
+            <a href="./dashboard.php" style="text-decoration: none; color: rgb(56, 146, 206)">
+                ESCHOOL
+            </a>
+        </div>
 
         <div class="footer-links">
             <a href="#">Terms & Conditions</a>
             <a href="#">Customer Support</a>
         </div>
-
     </footer>
 
 </body>

@@ -1,65 +1,91 @@
 <?php
-    session_start();
+session_start();
+require_once 'connect.php';
 
-    if(!isset($_SESSION['id'])){
-        header("Location: index.php");
-        exit();
+
+header('Content-Type: application/json');
+
+// Check authentication
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    echo json_encode(['success' => false, 'message' => 'Please login to delete documents.']);
+    exit();
+}
+
+
+$documentId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+if ($documentId <= 0) {
+    echo json_encode(['success' => false, 'message' => 'Invalid document ID.']);
+    exit();
+}
+
+$userId = $_SESSION['id'];
+
+
+$stmt = $conn->prepare("SELECT id, file_path, file_name, uploaded_by FROM downloads WHERE id = ?");
+$stmt->bind_param("i", $documentId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    echo json_encode(['success' => false, 'message' => 'Document not found.']);
+    exit();
+}
+
+$document = $result->fetch_assoc();
+
+
+if ($document['uploaded_by'] != $userId) {
+    echo json_encode(['success' => false, 'message' => 'You don\'t have permission to delete this document.']);
+    exit();
+}
+
+
+$conn->begin_transaction();
+
+try {
+    
+    $stmt = $conn->prepare("DELETE FROM document_views WHERE document_id = ?");
+    $stmt->bind_param("i", $documentId);
+    $stmt->execute();
+    
+    
+    $stmt = $conn->prepare("DELETE FROM user_downloads WHERE download_id = ?");
+    $stmt->bind_param("i", $documentId);
+    $stmt->execute();
+    
+    
+    $stmt = $conn->prepare("DELETE FROM downloads WHERE id = ?");
+    $stmt->bind_param("i", $documentId);
+    $stmt->execute();
+    
+    
+    $filePath = $document['file_path'];
+    if (file_exists($filePath)) {
+        unlink($filePath);
     }
+    
+    
+    $conn->commit();
+    
+    
+    error_log("User $userId deleted document: " . $document['file_name'] . " (ID: $documentId)");
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Document deleted successfully.'
+    ]);
+    
+} catch (Exception $e) {
+    
+    $conn->rollback();
+    error_log("Error deleting document: " . $e->getMessage());
+    
+    echo json_encode([
+        'success' => false,
+        'message' => 'Failed to delete document. Please try again.'
+    ]);
+}
 
-    include "connect.php";
-
-    $userId = $_SESSION['id'];
-
-    if(isset($_GET['id'])){
-        $documentId = $_GET['id'];
-
-        // First get the file path (to delete the actual file)
-        $stmt = $conn->prepare("SELECT file_path FROM downloads 
-            WHERE id = ? AND uploaded_by = ?"
-        );
-
-        $stmt->bind_param("ii", $documentId, $userId);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        if($result->num_rows > 0){
-            $document = $result->fetch_assoc();
-
-            // Delete physical file
-            if(file_exists($document['file_path'])){
-                unlink($document['file_path']);
-            }
-
-            // Delete views
-            $stmt = $conn->prepare(
-                "DELETE FROM document_views WHERE document_id = ?"
-            );
-
-            $stmt->bind_param("i",$documentId);
-            $stmt->execute();
-
-            // Delete downloads history
-            $stmt = $conn->prepare(
-                "DELETE FROM user_downloads WHERE download_id = ?"
-            );
-
-            $stmt->bind_param("i",$documentId);
-            $stmt->execute();
-
-            // Delete the document itself
-            $stmt = $conn->prepare(
-                "DELETE FROM downloads 
-                WHERE id = ? AND uploaded_by = ?"
-            );
-
-            $stmt->bind_param("ii",$documentId,$userId);
-            $stmt->execute();
-
-            header("Location: track_my_growth.php?deleted=success");
-            exit();
-        }else{
-            echo "You cannot delete this document.";
-        }
-    }
+$conn->close();
 ?>

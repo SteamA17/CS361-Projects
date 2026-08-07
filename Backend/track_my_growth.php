@@ -158,9 +158,9 @@
             <!-- Navigation Tabs -->
             <div class="tabs">
                 <a href="./dashboard.php">Dashboard</a>
-                <a href="notes.html">Notes</a>
-                <a href="tests.html">Tests</a>
-                <a href="sessional.html">Sessional</a>
+                <a href="notes.php">Notes</a>
+                <a href="tests.php">Tests</a>
+                <a href="sessional.php">Sessional</a>
             </div>
 
             <h2 class="growth-title" style="margin-bottom: 25px; color: #3892ce;">My Business Growth</h2>
@@ -183,12 +183,28 @@
                     </div>
 
                 <?php else: ?>
+                    <?php
+                        if(isset($_GET['deleted'])){
+                            echo "
+                            <div style='
+                                background:#d4edda;
+                                color:#155724;
+                                padding:15px;
+                                border-radius:8px;
+                                margin-bottom:20px;
+                            '>
+                                Document deleted successfully.
+                            </div>
+                            ";
+                        }
+                    ?>
                     <table class="analytics-table">
                         <tr>
                         <th>Document</th>
                         <th>Views</th>
                         <th>Downloads</th>
                         <th>Earnings</th>
+                        <th>Action</th>
                         </tr>
 
                         <?php
@@ -200,6 +216,21 @@
                                         <td>{$row['views']}</td>
                                         <td>{$row['downloads']}</td>
                                         <td>K".number_format($earnings,2)."</td>
+                                        <td>
+                                            <a 
+                                            href='delete_document.php?id={$row['id']}'
+                                            onclick=\"return confirm('Are you sure you want to delete this document?');\"
+                                            style='
+                                            background:#e74c3c;
+                                            color:white;
+                                            padding:8px 15px;
+                                            border-radius:5px;
+                                            text-decoration:none;
+                                            '>
+                                            <i class='fa-solid fa-trash'></i>
+                                            Delete
+                                            </a>
+                                        </td>
                                     </tr>
                                 ";
                             }

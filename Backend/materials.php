@@ -45,6 +45,34 @@
         a.download-btn:hover {
             background-color: #45a049;
         }
+
+        .modal{
+            display:none;
+            position:fixed;
+            z-index:1000;
+            left:0;
+            top:0;
+            width:100%;
+            height:100%;
+            background:rgba(0,0,0,0.7);
+        }
+
+        .modal-content{
+            background:white;
+            width:80%;
+            height:80%;
+            margin:5% auto;
+            padding:20px;
+            border-radius:15px;
+            overflow:hidden;
+        }
+
+        .close{
+            float:right;
+            font-size:30px;
+            cursor:pointer;
+            color:#3892ce;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +114,12 @@
                             echo"<tr>
                                     <td>".htmlspecialchars($row['title'])."</td>
                                     <td>".htmlspecialchars($row['description'])."</td>
-                                    <td><a class='download-btn' href='view_documents.php?id=" . $row['id'] . "'>View</a></td>
+                                    <td>
+                                        <button class='download-btn'
+                                        onclick=\"openDocument('".$row['file_path']."')\">
+                                        View
+                                        </button>
+                                    </td>
                                 </tr>";
                         }
                     }else{
@@ -112,6 +145,35 @@
             <a href="#">Customer Support</a>
         </div>
     </footer>
+
+    <!-- Document Viewer -->
+    <div id="documentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDocument()">
+                &times;
+            </span>
+
+            <iframe 
+                id="documentViewer"
+                src=""
+                width="100%"
+                height="90%">
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        function openDocument(file){
+            document.getElementById("documentModal").style.display = "block";
+            document.getElementById("documentViewer").src = file;
+        }
+
+        function closeDocument(){
+            document.getElementById("documentModal").style.display = "none";
+            document.getElementById("documentViewer").src = "";
+        }
+
+    </script>
 </body>
 </html>
 

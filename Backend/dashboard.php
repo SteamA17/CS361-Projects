@@ -47,10 +47,10 @@
 
             <!-- Navigation Tabs -->
             <div class="tabs">
-                <a href="dashboard.html" class="active">Dashboard</a>
-                <a href="notes.html">Notes</a>
-                <a href="tests.html">Tests</a>
-                <a href="sessional.html">Sessional</a>
+                <a href="dashboard.php" class="active">Dashboard</a>
+                <a href="notes.php">Notes</a>
+                <a href="tests.php">Tests</a>
+                <a href="sessional.php">Sessional</a>
             </div>
 
             <!-- Top Cards -->

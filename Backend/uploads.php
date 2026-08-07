@@ -14,6 +14,8 @@
     $uploadedBy = $_SESSION['id'];
     $title = $_POST['title'];
     $description = $_POST['description'];
+    $documentType = $_POST['document_type'];
+    $year = $_POST['year'];
 
     //File Information
     $fileName = $_FILES['file']['name'];
@@ -26,13 +28,15 @@
 
     //Move Files To Upload Folder
     if(move_uploaded_file($tmpName,$filePath)){
-        $sql = "INSERT INTO downloads(title,description,file_name,file_path,file_type,uploaded_by) 
+        $sql = "INSERT INTO downloads(title,description,file_name,file_path,file_type,uploaded_by,document_type,year) 
         VALUES('$title',
         '$description',
         '$fileName',
         '$filePath',
         '$fileType',
-        '$uploadedBy'
+        '$uploadedBy',
+        '$documentType',
+        '$year'
         )";
 
         if(mysqli_query($conn,$sql)){
@@ -76,7 +80,8 @@
 
         .uploads input[type="text"],
         .uploads textarea,
-        .uploads input[type="file"]{
+        .uploads input[type="file"]
+        .uploads select{
             width: 100%;
             padding: 14px;
             font-size: 15px;
@@ -92,7 +97,8 @@
         }
 
         .uploads input:focus,
-        .uploads textarea:focus{
+        .uploads textarea:focus
+        .uploads select:focus{
             outline: none;
             border-color: #3892ce;
             box-shadow: 0 0 8px rgba(56,146,206,.2);
@@ -146,9 +152,9 @@
             <!-- Navigation Tabs -->
             <div class="tabs">
                 <a href="./dashboard.php">Dashboard</a>
-                <a href="notes.html">Notes</a>
-                <a href="tests.html">Tests</a>
-                <a href="sessional.html">Sessional</a>
+                <a href="notes.php">Notes</a>
+                <a href="tests.php">Tests</a>
+                <a href="sessional.php">Sessional</a>
             </div>
 
             <h2 class="growth-title" style="margin-bottom: 25px; color: #3892ce;">Upload File</h2>
@@ -159,6 +165,22 @@
 
                     <textarea name="description" id="Description" placeholder="Enter file description" required></textarea>
 
+                    <select name="year" id="year" required>
+                        <option value="" selected disabled>Select Academic Year</option>
+                        <option value="Year 1">Year 1</option>
+                        <option value="Year 2">Year 2</option>
+                        <option value="Year 3">Year 3</option>
+                        <option value="Year 4">Year 4</option>
+                        <option value="Year 5">Year 5</option>
+                    </select>
+
+                    <select name="document_type" id="document_type" required>
+                        <option value="" selected disabled>Select Document Type</option>
+                        <option value="notes">Notes</option>
+                        <option value="test">Test Paper</option>
+                        <option value="sessional">Sessional Paper</option>
+                    </select>
+                    
                     <input type="file" name="file" placeholder="Select File" required>
 
                     <button type="submit" name="upload">Submit</button>

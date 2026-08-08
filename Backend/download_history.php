@@ -14,16 +14,14 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $perPage = 15;
 $offset = ($page - 1) * $perPage;
 
-$countStmt = $conn->prepare("
-    SELECT COUNT(*) as total FROM user_downloads WHERE user_id = ?
+$countStmt = $conn->prepare("SELECT COUNT(*) as total FROM user_downloads WHERE user_id = ?
 ");
 $countStmt->bind_param("i", $userId);
 $countStmt->execute();
 $totalItems = $countStmt->get_result()->fetch_assoc()['total'];
 $totalPages = ceil($totalItems / $perPage);
 
-$stmt = $conn->prepare("
-    SELECT 
+$stmt = $conn->prepare("SELECT 
         downloads.title,
         downloads.description,
         downloads.file_type,

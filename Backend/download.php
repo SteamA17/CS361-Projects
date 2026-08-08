@@ -15,10 +15,20 @@ if ($downloadId <= 0) {
 
 $userId = $_SESSION['id'];
 
+/*
+|--------------------------------------------------------------------------
+| Get file information
+|--------------------------------------------------------------------------
+*/
 
-$stmt = $conn->prepare("SELECT * FROM downloads WHERE id = ?");
+$stmt = $conn->prepare("SELECT *
+    FROM downloads
+    WHERE id = ?
+");
+
 $stmt->bind_param("i", $downloadId);
 $stmt->execute();
+
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
@@ -27,31 +37,76 @@ if ($result->num_rows === 0) {
 
 $file = $result->fetch_assoc();
 
+$stmt->close();
 
-if (!file_exists($file['file_path'])) {
+
+/*
+|--------------------------------------------------------------------------
+| Convert database path to actual server path
+|--------------------------------------------------------------------------
+*/
+
+$filePath = __DIR__ . '/' . $file['file_path'];
+
+if (!file_exists($filePath)) {
     die("File no longer exists on the server.");
 }
 
 
-$checkStmt = $conn->prepare("SELECT id FROM user_downloads WHERE user_id = ? AND download_id = ?");
+/*
+|--------------------------------------------------------------------------
+| Record the download
+|--------------------------------------------------------------------------
+*/
+
+$checkStmt = $conn->prepare("SELECT id
+    FROM user_downloads
+    WHERE user_id = ?
+    AND download_id = ?
+");
+
 $checkStmt->bind_param("ii", $userId, $downloadId);
 $checkStmt->execute();
-if ($checkStmt->get_result()->num_rows === 0) {
-    $insertStmt = $conn->prepare("INSERT INTO user_downloads (user_id, download_id) VALUES (?, ?)");
+
+$checkResult = $checkStmt->get_result();
+
+
+if ($checkResult->num_rows === 0) {
+
+    $insertStmt = $conn->prepare("INSERT INTO user_downloads
+        (user_id, download_id)
+        VALUES (?, ?)
+    ");
+
     $insertStmt->bind_param("ii", $userId, $downloadId);
     $insertStmt->execute();
+
+    $insertStmt->close();
 }
 
+$checkStmt->close();
 
-error_log("User $userId downloaded file: " . $file['file_name']);
 
+/*
+|--------------------------------------------------------------------------
+| Download the file
+|--------------------------------------------------------------------------
+*/
 
 header("Content-Type: application/octet-stream");
-header("Content-Disposition: attachment; filename=\"" . basename($file['file_name']) . "\"");
-header("Content-Length: " . filesize($file['file_path']));
+
+header(
+    "Content-Disposition: attachment; filename=\"" .
+    basename($file['file_name']) .
+    "\""
+);
+
+header("Content-Length: " . filesize($filePath));
+
 header("Cache-Control: no-cache, must-revalidate");
 header("Pragma: no-cache");
 
-readfile($file['file_path']);
+readfile($filePath);
+
 exit();
 ?>

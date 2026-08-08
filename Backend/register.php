@@ -49,7 +49,7 @@ if (isset($_POST['signUp'])) {
     }
     
     
-    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id FROM users1 WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -64,7 +64,7 @@ if (isset($_POST['signUp'])) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
     
     
-    $stmt = $conn->prepare("INSERT INTO users (firstName, surName, email, password) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users1 (firstName, surName, email, password) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssss", $firstName, $surName, $email, $hashedPassword);
     
     if ($stmt->execute()) {
@@ -97,7 +97,7 @@ if (isset($_POST['signIn'])) {
     }
     
     
-    $stmt = $conn->prepare("SELECT id, firstName, email, password FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, firstName, email, password FROM users1 WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();

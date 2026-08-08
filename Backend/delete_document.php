@@ -12,7 +12,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 
-$documentId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+$documentId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($documentId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid document ID.']);
@@ -37,6 +37,7 @@ $document = $result->fetch_assoc();
 
 if ($document['uploaded_by'] != $userId) {
     echo json_encode(['success' => false, 'message' => 'You don\'t have permission to delete this document.']);
+    header("Location: track_my_growth.php?deleted=success");
     exit();
 }
 
@@ -75,6 +76,7 @@ try {
         'success' => true,
         'message' => 'Document deleted successfully.'
     ]);
+    header("Location: track_my_growth.php?deleted=success");
     
 } catch (Exception $e) {
     
@@ -85,6 +87,7 @@ try {
         'success' => false,
         'message' => 'Failed to delete document. Please try again.'
     ]);
+    header("Location: track_my_growth.php?deleted=success");
 }
 
 $conn->close();

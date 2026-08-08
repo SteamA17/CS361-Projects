@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
 }
 
 // Get user data
-$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT * FROM users1 WHERE id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();

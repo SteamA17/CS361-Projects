@@ -1,59 +1,110 @@
-<?php 
-    session_start();
-    
-    if(!isset($_SESSION['id'])){
-        header("Location: index.php");
-        exit();
-    }
+<?php
+session_start();
 
-    include 'connect.php';
+if (!isset($_SESSION['id'])) {
+    header("Location: index.php");
+    exit();
+}
 
-    $userId = $_SESSION['id'];
+include 'connect.php';
 
-    // Getting total Uploads
-    $stmt = $conn->prepare("SELECT COUNT(*) AS totalUploads FROM downloads WHERE uploaded_by = ?");
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
+$userId = $_SESSION['id'];
 
-    $totalUploads = $stmt->get_result()->fetch_assoc()['totalUploads'];
 
-    if($totalUploads == 0){
-        $hasUploads = false;
-    }else{
-        $hasUploads = true;
-    }
+// ========================================
+// Getting total uploads
+// ========================================
+$stmt = $conn->prepare("SELECT COUNT(*) AS totalUploads
+    FROM downloads
+    WHERE uploaded_by = ?
+");
 
-    // Getting total Views
-    $stmt = $conn->prepare("SELECT COUNT(*) AS totalViews FROM document_views dv 
-    INNER JOIN downloads d ON dv.document_id = d.id WHERE d.uploaded_by = ?");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
 
-    $stmt->bind_param("i",$userId);
-    $stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
 
-    $totalViews = $stmt->get_result()->fetch_assoc()['totalViews'];
+$totalUploads = $row['totalUploads'];
 
-    // Getting total Downloads
-    $stmt = $conn->prepare("SELECT COUNT(*) AS totalDownloads FROM user_downloads ud
-    INNER JOIN downloads d ON ud.download_id = d.id WHERE d.uploaded_by = ?");
+$uploadCount = $totalUploads;
 
-    $stmt->bind_param("i",$userId);
-    $stmt->execute();
+$hasUploads = ($totalUploads > 0);
 
-    $totalDownloads = $stmt->get_result()->fetch_assoc()['totalDownloads'];
+$stmt->close();
 
-    // Calculating Total Earnings
-    $ratePerDownload = 0.50;
-    $totalEarnings = $totalDownloads * $ratePerDownload;
 
-    // Analytics for each upload
-    $stmt = $conn->prepare("SELECT d.id, d.title, COUNT(DISTINCT dv.id) AS views, COUNT(DISTINCT ud.id) AS downloads
-    FROM downloads d LEFT JOIN document_views dv ON d.id = dv.document_id LEFT JOIN user_downloads ud
-    ON d.id = ud.download_id WHERE d.uploaded_by = ? GROUP BY d.id ORDER BY downloads DESC");
+// ========================================
+// Getting total views
+// ========================================
+$stmt = $conn->prepare("SELECT COUNT(*) AS totalViews
+    FROM document_views dv
+    INNER JOIN downloads d ON dv.document_id = d.id
+    WHERE d.uploaded_by = ?
+");
 
-    $stmt->bind_param("i",$userId);
-    $stmt->execute();
+$stmt->bind_param("i", $userId);
+$stmt->execute();
 
-    $documents = $stmt->get_result();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+
+$totalViews = $row['totalViews'];
+
+$stmt->close();
+
+
+// ========================================
+// Getting total downloads
+// ========================================
+$stmt = $conn->prepare("SELECT COUNT(*) AS totalDownloads
+    FROM user_downloads ud
+    INNER JOIN downloads d ON ud.download_id = d.id
+    WHERE d.uploaded_by = ?
+");
+
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+
+$totalDownloads = $row['totalDownloads'];
+
+$stmt->close();
+
+
+// ========================================
+// Calculating total earnings
+// ========================================
+$ratePerDownload = 0.50;
+
+$totalEarnings = $totalDownloads * $ratePerDownload;
+
+
+// ========================================
+// Analytics for each uploaded document
+// ========================================
+$stmt = $conn->prepare("SELECT 
+        d.id,
+        d.title,
+        COUNT(DISTINCT dv.id) AS views,
+        COUNT(DISTINCT ud.id) AS downloads
+    FROM downloads d
+    LEFT JOIN document_views dv 
+        ON d.id = dv.document_id
+    LEFT JOIN user_downloads ud 
+        ON d.id = ud.download_id
+    WHERE d.uploaded_by = ?
+    GROUP BY d.id, d.title
+    ORDER BY downloads DESC
+");
+
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+
+$documents = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>
@@ -147,20 +198,23 @@
     <div class="container">
         <!-- Sidebar -->
          <aside>
+            <a href="dashboard.php" class="active"><i class="fa-solid fa-home"></i> Dashboard</a>
             <a href="lecture_videos.php"><i class="fa-solid fa-video"></i> Lecture Videos</a>
             <a href="download_history.php"><i class="fa-solid fa-download"></i> Downloads</a>
-            <a href="#"><i class="fa-solid fa-comments"></i> Group Chat</a>
-            <a href="materials.php"><i class="fa-solid fa-book"></i>Materials</a>
-            <a href="profile.php"><i class="fa-solid fa-circle-info"></i> Info</a>
+            <a href="materials.php"><i class="fa-solid fa-book"></i> Materials</a>
+            <a href="profile.php"><i class="fa-solid fa-circle-info"></i> Profile</a>
+            <?php if ($uploadCount > 0): ?>
+            <a href="track_my_growth.php"><i class="fa-solid fa-chart-line"></i> My Growth</a>
+            <?php endif; ?>
         </aside>
 
         <main>
             <!-- Navigation Tabs -->
             <div class="tabs">
                 <a href="./dashboard.php">Dashboard</a>
-                <a href="notes.html">Notes</a>
-                <a href="tests.html">Tests</a>
-                <a href="sessional.html">Sessional</a>
+                <a href="notes.php">Notes</a>
+                <a href="tests.php">Tests</a>
+                <a href="sessional.php">Sessional</a>
             </div>
 
             <h2 class="growth-title" style="margin-bottom: 25px; color: #3892ce;">My Business Growth</h2>
@@ -185,10 +239,11 @@
                 <?php else: ?>
                     <table class="analytics-table">
                         <tr>
-                        <th>Document</th>
-                        <th>Views</th>
-                        <th>Downloads</th>
-                        <th>Earnings</th>
+                            <th>Document</th>
+                            <th>Views</th>
+                            <th>Downloads</th>
+                            <th>Earnings</th>
+                            <th>Action</th>
                         </tr>
 
                         <?php
@@ -200,6 +255,21 @@
                                         <td>{$row['views']}</td>
                                         <td>{$row['downloads']}</td>
                                         <td>K".number_format($earnings,2)."</td>
+                                        <td>
+                                            <a 
+                                            href='delete_document.php?id={$row['id']}'
+                                            onclick=\"return confirm('Are you sure you want to delete this document?');\"
+                                            style='
+                                            background:#e74c3c;
+                                            color:white;
+                                            padding:8px 15px;
+                                            border-radius:5px;
+                                            text-decoration:none;
+                                            '>
+                                            <i class='fa-solid fa-trash'></i>
+                                            Delete
+                                            </a>
+                                        </td>
                                     </tr>
                                 ";
                             }

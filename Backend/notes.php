@@ -1,6 +1,9 @@
 <?php
+
 session_start();
+
 require_once 'connect.php';
+
 
 // Check authentication
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -8,20 +11,140 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit();
 }
 
+
 // Session timeout
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+if (
+    isset($_SESSION['last_activity']) &&
+    (time() - $_SESSION['last_activity'] > 1800)
+) {
     session_destroy();
     header("Location: index.php?timeout=1");
     exit();
 }
+
 $_SESSION['last_activity'] = time();
 
-// Get user stats for sidebar
+
+// Logged-in student
 $userId = $_SESSION['id'];
-$stmt = $conn->prepare("SELECT COUNT(*) as total FROM downloads WHERE uploaded_by = ?");
+
+
+// Get user stats for sidebar
+$stmt = $conn->prepare("SELECT COUNT(*) AS total
+    FROM downloads
+    WHERE uploaded_by = ?
+");
+
 $stmt->bind_param("i", $userId);
 $stmt->execute();
+
 $uploadCount = $stmt->get_result()->fetch_assoc()['total'];
+
+$stmt->close();
+
+
+// --------------------------------------------------
+// SELECTED YEAR
+// --------------------------------------------------
+
+$selectedYear = isset($_GET['year'])
+    ? $_GET['year']
+    : 'Year 1';
+
+
+// Allowed years
+$allowedYears = [
+    'Year 1',
+    'Year 2',
+    'Year 3',
+    'Year 4',
+    'Year 5'
+];
+
+
+// Make sure selected year is valid
+if (!in_array($selectedYear, $allowedYears, true)) {
+    $selectedYear = 'Year 1';
+}
+
+
+// --------------------------------------------------
+// SELECTED DOCUMENT TYPE
+// --------------------------------------------------
+
+$selectedType = isset($_GET['type'])
+    ? strtolower(trim($_GET['type']))
+    : 'notes';
+
+
+// Allowed document types
+$allowedTypes = [
+    'notes',
+    'test',
+    'sessional'
+];
+
+
+// Make sure selected type is valid
+if (!in_array($selectedType, $allowedTypes, true)) {
+    $selectedType = 'notes';
+}
+
+
+// --------------------------------------------------
+// PAGE TITLE
+// --------------------------------------------------
+
+$typeTitles = [
+    'notes' => 'Notes',
+    'test' => 'Tests',
+    'sessional' => 'Sessional'
+];
+
+$pageTitle = $typeTitles[$selectedType];
+
+
+// --------------------------------------------------
+// GET ONLY DOCUMENTS DOWNLOADED BY THIS STUDENT
+// FOR THE SELECTED YEAR AND DOCUMENT TYPE
+// --------------------------------------------------
+
+$stmt = $conn->prepare("SELECT
+        d.id,
+        d.title,
+        d.description,
+        d.year,
+        d.document_type,
+        d.file_name,
+        d.file_path,
+        d.file_type,
+        d.upload_date,
+        ud.downloaded_at
+
+    FROM user_downloads ud
+
+    INNER JOIN downloads d
+        ON ud.download_id = d.id
+
+    WHERE ud.user_id = ?
+      AND d.year = ?
+      AND LOWER(TRIM(d.document_type)) = ?
+
+    ORDER BY ud.downloaded_at DESC
+");
+
+
+$stmt->bind_param(
+    "iss",
+    $userId,
+    $selectedYear,
+    $selectedType
+);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,7 +155,72 @@ $uploadCount = $stmt->get_result()->fetch_assoc()['total'];
     <link rel="stylesheet" href="../Frontend/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
         
+        .material-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            position: relative;
+        }
+        
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        .material-card .file-icon {
+            font-size: 40px;
+            color: #3892ce;
+            margin-bottom: 10px;
+        }
+        
+        .material-card a {
+            color: #4a4e52;
+            font-size: 20px;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            margin: 10px 0;
+            line-height: 1.5;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .material-card .material-title {
+            color: #4a4e52;
+            font-size: 15px;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            margin: 10px 0;
+            line-height: 1.5;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .material-card .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 13px;
+            color: #888;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .material-card .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
         .section-title {
             font-size: 22px;
             font-weight: 600;
@@ -47,115 +235,27 @@ $uploadCount = $stmt->get_result()->fetch_assoc()['total'];
             margin-bottom: 25px;
             flex-wrap: wrap;
         }
-        
-        .year-tabs button {
-            padding: 8px 22px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            background: white;
-            color: #555;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-        }
-        
-        .year-tabs button:hover {
-            border-color: #3892ce;
-            color: #3892ce;
-            transform: translateY(-2px);
-        }
-        
-        .year-tabs button.active-year {
-            background: #3892ce;
-            color: white;
-            border-color: #3892ce;
-        }
-        
-        .card-row {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            align-items: stretch;
-        }
-        
-        .card-row .card {
-            flex: 0 0 180px;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-        
-        .card-row .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-        }
-        
-        .card-row .card .image {
-            height: 120px;
-            background: linear-gradient(135deg, #3892ce, #2d7bb3);
-        }
-        
-        .card-row .card .text {
-            padding: 15px;
-            text-align: center;
-            font-weight: 600;
-            color: #1a1a2e;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-        }
-        
-        .card-row .arrow {
-            display: flex;
-            align-items: center;
-            font-size: 30px;
-            color: #3892ce;
-            padding: 0 10px;
-        }
-        
-        .business-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 25px 0 20px 0;
-        }
-        
-        .business-header h3 {
-            color: #1a1a2e;
-            font-weight: 600;
-            font-size: 18px;
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-        }
-        
-        .add-btn {
-            padding: 8px 20px;
-            background: #3892ce;
-            color: white;
-            border: none;
+
+        .year-tabs a {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
+            background: #f8f9fa;
+            color: #555;
+            text-decoration: none;
             font-family: 'Poppins', sans-serif;
-            font-size: 14px;
             transition: all 0.2s ease;
         }
-        
-        .add-btn:hover {
-            background: #2d7bb3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(56, 146, 206, 0.3);
+
+        .year-tabs a:hover {
+            background: #e9ecef;
         }
-        
-        .add-btn i {
-            margin-right: 6px;
+
+        .year-tabs a.active-year {
+            background: #3892ce;
+            color: white;
+            border-color: #3892ce;
         }
-        
         
         .logout-link {
             color: #3892ce !important;
@@ -250,88 +350,102 @@ $uploadCount = $stmt->get_result()->fetch_assoc()['total'];
             <?php endif; ?>
         </aside>
 
-        <main>
-            <!-- Navigation Tabs -->
-            <div class="tabs">
-                <a href="dashboard.php">Dashboard</a>
-                <a href="notes.php" class="active">Notes</a>
-                <a href="tests.php">Tests</a>
-                <a href="sessional.php">Sessional</a>
-            </div>
+        <main> 
+            <!--  MAIN TABS  --> 
+            <div class="tabs"> 
+                <a href="dashboard.php"> Dashboard </a> 
+                <a href="notes.php?year=<?php echo urlencode($selectedYear);?>&type=notes" class="<?php echo ($selectedType === 'notes') ? 'active' : ''; ?>" >
+                     Notes 
+                </a> 
+                <a href="tests.php?year=<?php echo urlencode($selectedYear);?>&type=test" class="<?php echo ($selectedType === 'test') ? 'active' : ''; ?>" >
+                     Tests 
+                </a> 
+                <a href="sessional.php?year=<?php echo urlencode($selectedYear); ?>&type=sessional" class="<?php echo ($selectedType === 'sessional') ? 'active' : ''; ?>" >
+                     Sessional 
+                </a> 
+            </div> 
+            
+            <!--  TITLE --> 
+            <div class="section-title"> 
+                <i class="fa-solid fa-book-open" style="color: #3892ce; margin-right: 10px;" ></i>
+                 My <?php echo htmlspecialchars($pageTitle); ?> 
+            </div> 
+              
+            <!--  YEAR TABS  --> 
+            <div class="year-tabs"> 
+                <?php foreach ($allowedYears as $year): ?> 
+                    <a href="?year=<?php echo urlencode($year); 
+                        ?>&type=<?php echo urlencode($selectedType); ?>" class="<?php echo ($selectedYear === $year) ? 'active-year' : ''; ?>" >
+                        
+                        <?php echo htmlspecialchars($year); ?> 
+                    </a> 
+                <?php endforeach; ?> 
+            </div> 
+            
+            <!--  SELECTED YEAR + TYPE  --> 
+            <h3 style=" color: #3892ce; margin: 25px 0 15px; font-family: 'Poppins', sans-serif; " > 
+                <?php echo htmlspecialchars($selectedYear); ?> 
+                <?php echo htmlspecialchars($pageTitle); ?> 
+            </h3> 
+            
+            <!--  DOCUMENTS  --> 
+            <div class="materials-grid"> 
+                <?php if ($result->num_rows > 0): ?> 
+                    <?php while ($row = $result->fetch_assoc()): ?> 
+                        <div class="material-card"> 
+                            <a href="<?php echo htmlspecialchars($row['file_path']); ?>" target="_blank" class="material-link" >
+                                <div class="file-icon"> 
+                                    <?php $icon = 'fa-file'; 
+                                        if ( strpos( strtolower($row['file_type']), 'pdf' ) !== false ) { $icon = 'fa-file-pdf'; 
+                                        } elseif ( strpos( strtolower($row['file_type']), 'word' ) !== false ) 
+                                        { $icon = 'fa-file-word'; 
+                                        } elseif ( strpos( strtolower($row['file_type']), 'powerpoint' ) !== false ) 
+                                        { $icon = 'fa-file-powerpoint'; 
+                                        } elseif ( strpos( strtolower($row['file_type']), 'excel' ) !== false ) 
+                                        { $icon = 'fa-file-excel'; 
+                                        } elseif ( strpos( strtolower($row['file_type']), 'image' ) !== false ) 
+                                        { $icon = 'fa-file-image'; } ?> <i class="fa-solid <?php echo $icon; ?>"></i> 
+                                </div> 
+                                
+                                <div class="material-title"> 
+                                    <?php echo htmlspecialchars($row['title']);
+                                    echo " ";
+                                    echo htmlspecialchars($row['description']); ?> 
+                                </div> 
+                            </a> 
+                        </div> 
+                    <?php endwhile; ?> 
+                    
+                    <?php else: ?> 
+                        
+                <!--  NO DOCUMENTS  --> 
+                <div class="no-notes"> 
+                    <i class="fa-solid fa-folder-open"></i> <h3> No 
+                        <?php echo htmlspecialchars($pageTitle); ?> for 
+                        <?php echo htmlspecialchars($selectedYear); ?> </h3> 
+                        <p> Downloaded <?php echo strtolower(htmlspecialchars($pageTitle)); ?> for 
+                            <?php echo htmlspecialchars($selectedYear); ?> will appear here. 
+                        </p> 
+                </div> 
+                <?php endif; ?> 
+            </div> 
+            
+            <hr> 
+            
+            <!--  MY BUSINESS --> 
+             <h3>My Business</h3> 
+             <div class="cards"> 
+                <div class="card"> 
+                    <div class="image">
 
-            <!-- Materials Section -->
-            <div class="section-title">
-                <i class="fa-solid fa-book-open" style="color: #3892ce; margin-right: 10px;"></i>
-                Materials
-            </div>
-
-            <div class="year-tabs">
-                <button class="active-year">Year 1</button>
-                <button>Year 2</button>
-                <button>Year 3</button>
-                <button>Year 4</button>
-                <button>Year 5</button>
-            </div>
-
-            <div class="card-row">
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">MA110</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">CS110</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">PH110</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">CH110</div>
-                </div>
-                <div class="arrow">
-                    <i class="fa-solid fa-angle-right"></i>
-                </div>
-            </div>
-
-            <hr>
-
-            <!-- My Business Section -->
-            <div class="business-header">
-                <h3><i class="fa-solid fa-chart-simple" style="color: #3892ce; margin-right: 8px;"></i>My Business</h3>
-                <button class="add-btn"><i class="fa-solid fa-plus"></i> Add</button>
-            </div>
-
-            <div class="year-tabs">
-                <button class="active-year">Year 1</button>
-                <button>Year 2</button>
-                <button>Year 3</button>
-                <button>Year 4</button>
-                <button>Year 5</button>
-            </div>
-
-            <div class="card-row">
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">CS150</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">CS120</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">CS130</div>
-                </div>
-                <div class="card">
-                    <div class="image"></div>
-                    <div class="text">MA320</div>
-                </div>
-                <div class="arrow">
-                    <i class="fa-solid fa-angle-right"></i>
-                </div>
-            </div>
+                    </div> 
+                    <div class="text"> 
+                        <a href="uploads.php" style=" text-decoration: none; color: inherit; " >
+                             Upload New Material 
+                        </a> 
+                    </div> 
+                </div> 
+            </div> 
         </main>
     </div>
 

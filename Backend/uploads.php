@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Configuration
 $uploadDir = __DIR__ . '/uploads/';
-$maxFileSize = 10 * 1024 * 1024; // 10MB
+$maxFileSize = 100 * 1024 * 1024; // 100MB
 $allowedTypes = [
     'application/pdf' => '.pdf',
     'application/msword' => '.doc',
@@ -41,13 +41,28 @@ $messageType = '';
 if (isset($_POST['upload'])) {
     $title = sanitize($_POST['title']);
     $description = sanitize($_POST['description']);
+    $year = sanitize($_POST['year']);
+    $documentType = sanitize($_POST['document_type']);
     $uploadedBy = $_SESSION['id'];
     
     // Validate title and description
     if (empty($title) || strlen($title) < 3) {
         $message = "Title must be at least 3 characters.";
         $messageType = 'error';
+
     } elseif (empty($description) || strlen($description) < 10) {
+        $message = "Description must be at least 10 characters.";
+        $messageType = 'error';
+
+    } elseif (empty($year)) {
+        $message = "Please select an academic year.";
+        $messageType = 'error';
+
+    } elseif (empty($documentType)) {
+        $message = "Please select a document type.";
+        $messageType = 'error';
+
+    } elseif ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
         $message = "Description must be at least 10 characters.";
         $messageType = 'error';
     } elseif ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
@@ -62,7 +77,7 @@ if (isset($_POST['upload'])) {
         }
         // Validate file size
         elseif ($_FILES['file']['size'] > $maxFileSize) {
-            $message = "File too large. Maximum size is 10MB.";
+            $message = "File too large. Maximum size is 100MB.";
             $messageType = 'error';
         }
         // Validate file (scan for malicious content)
@@ -79,16 +94,29 @@ if (isset($_POST['upload'])) {
                 // Generate safe filename
                 $extension = $allowedTypes[$fileType];
                 $safeName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $title) . $extension;
+                
                 $filePath = $uploadDir . $safeName;
+                $webPath = "uploads/" . $safeName;
                 
                 // Move file
                 if (move_uploaded_file($tmpFile, $filePath)) {
                     // Save to database
-                    $stmt = $conn->prepare("
-                        INSERT INTO downloads (title, description, file_name, file_path, file_type, uploaded_by) 
-                        VALUES (?, ?, ?, ?, ?, ?)
+                    $stmt = $conn->prepare(" INSERT INTO downloads 
+                        (title, description, year, document_type, file_name, file_path, file_type, uploaded_by) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     ");
-                    $stmt->bind_param("sssssi", $title, $description, $safeName, $filePath, $fileType, $uploadedBy);
+
+                    $stmt->bind_param(
+                        "sssssssi",
+                        $title,
+                        $description,
+                        $year,
+                        $documentType,
+                        $safeName,
+                        $webPath,
+                        $fileType,
+                        $uploadedBy
+                    );
                     
                     if ($stmt->execute()) {
                         $message = "File uploaded successfully!";
@@ -346,6 +374,26 @@ if (!function_exists('verifyCSRFToken')) {
         .logout-link i {
             margin-right: 4px;
         }
+        .form-row select {
+            width: 100%;
+            padding: 10px 16px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            color: #1a1a2e;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .form-row select:focus {
+            outline: none;
+            border-color: #3892ce;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(56, 146, 206, 0.08);
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -450,6 +498,36 @@ if (!function_exists('verifyCSRFToken')) {
                         </label>
                         <div class="input-wrapper">
                             <textarea id="description" name="description" placeholder="Describe your file" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="year">
+                            <i class="fa-solid fa-calendar"></i> Academic Year *
+                        </label>
+                        <div class="input-wrapper">
+                            <select id="year" name="year" required>
+                                <option value="" selected disabled>Select Academic Year</option>
+                                <option value="Year 1">Year 1</option>
+                                <option value="Year 2">Year 2</option>
+                                <option value="Year 3">Year 3</option>
+                                <option value="Year 4">Year 4</option>
+                                <option value="Year 5">Year 5</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="document_type">
+                            <i class="fa-solid fa-file-lines"></i> Document Type *
+                        </label>
+                        <div class="input-wrapper">
+                            <select id="document_type" name="document_type" required>
+                                <option value="" selected disabled>Select Document Type</option>
+                                <option value="notes">Notes</option>
+                                <option value="test">Test Paper</option>
+                                <option value="sessional">Sessional Paper</option>
+                            </select>
                         </div>
                     </div>
                     

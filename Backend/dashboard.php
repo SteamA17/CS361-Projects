@@ -31,14 +31,9 @@ $stmt->execute();
 $downloadCount = $stmt->get_result()->fetch_assoc()['total'];
 
 // Get recent downloads from user_downloads table
-$stmt = $conn->prepare("
-    SELECT d.title, ud.downloaded_at 
-    FROM user_downloads ud
-    INNER JOIN downloads d ON ud.download_id = d.id
-    WHERE ud.user_id = ? 
-    ORDER BY ud.downloaded_at DESC 
-    LIMIT 5
-");
+$stmt = $conn->prepare(" SELECT d.title, ud.downloaded_at FROM user_downloads ud
+    INNER JOIN downloads d ON ud.download_id = d.id WHERE ud.user_id = ? 
+    ORDER BY ud.downloaded_at DESC LIMIT 5");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $recentDownloads = $stmt->get_result();
@@ -349,9 +344,7 @@ $recentDownloads = $stmt->get_result();
                 <div class="card">
                     <div class="image"></div>
                     <div class="text">
-                        <a href="materials.php">
-                            <i class="fa-solid fa-book-open"></i> Browse Materials
-                        </a>
+                        <a href="track_my_growth.php" style="text-decoration: none; color: inherit;">Track My Growth</a>
                     </div>
                 </div>
             </div>
